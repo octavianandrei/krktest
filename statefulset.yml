@@ -32,6 +32,7 @@ spec:
       securityContext:
         runAsUser: 1001
         fsGroup: 1001
+#use local image of the Dockerfile that was created in the previous exercise
       containers:
         - name: main
           image: litecoind:krakentest
@@ -51,6 +52,7 @@ spec:
             initialDelaySeconds: 10
             timeoutSeconds: 1
             periodSeconds: 10
+ #use local hostpath for volumeclaim since I used k8s for desktop on a Mac           
   volumeClaimTemplates:
     - metadata:
         name: litecoin-data
