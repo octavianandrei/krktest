@@ -8,28 +8,28 @@ properties([
 timestamps {
     node () {
         stage('Clear WORKSPACE') {
-	         cleanWs()
+	  cleanWs()
       	}
       	stage("Clone Repo"){
-      	     String repo_branch = "${BRANCH}"
-                   git branch: repo_branch, url: 'https://github.com/octavianandrei/krktest.git'
+      	  String repo_branch = "master"
+          git branch: repo_branch, url: 'https://github.com/octavianandrei/krktest.git'
       	}
 
       	stage('Exec permissions') {
-                println "Add exec permission"
+          println "Add exec permission"
       	  sh "chmod +x start_docker.sh"
-              }
+        }
 
       	stage('Build the docker image locally'){
-      	sh "docker build -t litecoind:krakentest ."
+          sh "docker build -t litecoind:krakentest ."
       	}
 
         stage('Deploy on local k8s cluster') {
-        sh "kubectl -f statefulset.yaml"
+          sh "kubectl -f statefulset.yaml"
         }
 
         stage('Clear WORKSPACE') {
-              cleanWs()
+          cleanWs()
         }
     }  
 
