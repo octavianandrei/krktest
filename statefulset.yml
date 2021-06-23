@@ -1,0 +1,65 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: litecoin
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: litecoin
+  namespace: litecoin
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: litecoin
+  name: litecoin
+  labels: &litecoinDeploymentlabels
+    app: litecoin
+    component: daemon
+    version: '0.8.1'
+spec:
+  selector:
+    matchLabels: *litecoinDeploymentlabels
+  serviceName: litecoin
+  replicas: 1
+  template:
+    metadata:
+      labels: *litecoinDeploymentlabels
+    spec:
+      serviceAccountName: litecoin
+      securityContext:
+        runAsUser: 1001
+        fsGroup: 1001
+      containers:
+        - name: main
+          image: litecoind:krakentest
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+          - name: litecoin-data
+            mountPath: "/home/litecoin/.litecoin"
+          resources:
+            requests:
+              memory: 512Mi
+            limits:
+              cpu: 1
+              memory: 1024Mi
+          readinessProbe:
+            tcpSocket:
+              port: 9333
+            initialDelaySeconds: 10
+            timeoutSeconds: 1
+            periodSeconds: 10
+  volumeClaimTemplates:
+    - metadata:
+        name: litecoin-data
+        labels: *litecoinDeploymentlabels
+      spec:
+        accessModes: 
+          - ReadWriteOnce
+        storageClassName: hostpath
+        resources:
+          requests:
+            storage: 10Gi
+---
